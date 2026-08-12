@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevMatch | Mutual Skill-Swap Mentorship</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden { display: none !important; }
+        
+        /* Smooth fade-in for views */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+
+    <!-- GLOBAL ERROR BANNER -->
+    <div id="global-error" class="hidden bg-red-600 text-white text-center py-2 px-4 shadow-md z-50"></div>
+
+    <!-- ==========================================
+         VIEW 1: LOGIN SCREEN 
+         ========================================== -->
+    <div id="login-view" class="flex-1 flex flex-col items-center justify-center p-6 fade-in">
+        <div class="mb-8 text-center">
+            <h1 class="text-4xl font-extrabold text-blue-600 flex items-center justify-center gap-3 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                DevMatch
+            </h1>
+            <p class="text-gray-500 font-medium">Powered by Java + CognoDB</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 w-full max-w-md">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Sign In</h2>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-2" for="login-select">Select Demo Profile</label>
+                <select id="login-select" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-gray-50 hover:bg-white cursor-pointer font-medium">
+                    <option value="">Loading users from database...</option>
+                </select>
+            </div>
+
+            <button id="login-btn" disabled class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-sm">
+                Enter Dashboard
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            <p class="text-xs text-center text-gray-400 mt-4">For the take-home assignment demo, password authentication is bypassed.</p>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW 2: MAIN DASHBOARD 
+         ========================================== -->
+    <div id="dashboard-view" class="hidden flex-1 flex flex-col fade-in">
+        
+        <!-- Navbar -->
+        <nav class="bg-white shadow-sm border-b border-gray-200 px-6 py-3">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <h1 class="text-xl font-bold text-blue-600 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    DevMatch
+                </h1>
+                <div class="flex items-center gap-4">
+                    <div class="hidden sm:flex items-center gap-2">
+                        <img id="nav-avatar" src="" alt="Profile" class="h-8 w-8 rounded-full bg-gray-200 object-cover border border-gray-300">
+                        <span id="nav-username" class="text-sm font-semibold text-gray-700">Name</span>
+                    </div>
+                    <button id="logout-btn" class="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors border border-gray-200 hover:border-red-200 px-3 py-1.5 rounded-md bg-gray-50 hover:bg-red-50">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto w-full px-4 py-8 grid grid-cols-1 md:grid-cols-12 gap-8 flex-1">
+            
+            <!-- Left Column: Current User Profile -->
+            <section class="col-span-1 md:col-span-4 bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit">
+                <h2 class="text-lg font-bold text-gray-800 mb-6 border-b pb-2">My Profile</h2>
+                
+                <div class="flex flex-col items-center text-center mb-6">
+                    <img id="profile-img" src="" alt="Profile" class="h-24 w-24 rounded-full object-cover shadow-sm border-4 border-white ring-2 ring-gray-100 bg-gray-50 mb-3">
+                    <h3 id="profile-name" class="text-2xl font-bold text-gray-800">Name</h3>
+                    <p class="text-sm text-gray-500">Looking for mutual skill swaps</p>
+                </div>
+
+                <div class="mb-5 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">I Can Teach</h3>
+                    <div id="skills-knows" class="flex flex-wrap gap-2"></div>
+                </div>
+                
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">I Want To Learn</h3>
+                    <div id="skills-wants" class="flex flex-wrap gap-2"></div>
+                </div>
+                
+                <button id="match-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Find Mutual Mentors
+                </button>
+            </section>
+
+            <!-- Right Column: Results -->
+            <section class="col-span-1 md:col-span-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 min-h-[600px]">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-3">Mentorship Matches</h2>
+                    
+                    <div id="results-loading" class="hidden flex flex-col items-center justify-center py-20">
+                        <div class="loader mb-4"></div>
+                        <p class="text-gray-500 font-medium">Running multi-hop traversal in CognoDB...</p>
+                    </div>
+
+                    <div id="empty-state" class="flex flex-col items-center justify-center py-20 text-center h-full">
+                        <div class="bg-blue-50 p-6 rounded-full mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Ready to find a partner?</h3>
+                        <p class="text-gray-500 max-w-sm">Click the button on the left to query the graph database for users with reciprocal learning goals.</p>
+                    </div>
+
+                    <div id="no-matches" class="hidden flex flex-col items-center justify-center py-20 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-gray-600 font-medium text-lg">No mutual mentors found.</p>
+                        <p class="text-gray-500 text-sm mt-2 max-w-md">
+                            The graph database enforces strict reciprocity. Currently, no one in the network wants to learn your skills who also knows what you want to learn.
+                        </p>
+                    </div>
+
+                    <div id="results-container" class="hidden flex flex-col gap-6">
+                        <!-- Dynamic Match Cards injected here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Use DiceBear API for cute, consistent avatars based on name seed
+        function getAvatarUrl(name) {
+            return `https://api.dicebear.com/7.x/notionists/svg?seed=${name}&backgroundColor=e2e8f0`;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            
+            // Views
+            const loginView = document.getElementById('login-view');
+            const dashboardView = document.getElementById('dashboard-view');
+            
+            // Login Elements
+            const loginSelect = document.getElementById('login-select');
+            const loginBtn = document.getElementById('login-btn');
+            const globalError = document.getElementById('global-error');
+            
+            // Dashboard Elements
+            const logoutBtn = document.getElementById('logout-btn');
+            const navAvatar = document.getElementById('nav-avatar');
+            const navUsername = document.getElementById('nav-username');
+            
+            const profileName = document.getElementById('profile-name');
+            const profileImg = document.getElementById('profile-img');
+            const knowsContainer = document.getElementById('skills-knows');
+            const wantsContainer = document.getElementById('skills-wants');
+            
+            const matchBtn = document.getElementById('match-btn');
+            const emptyState = document.getElementById('empty-state');
+            const loadingState = document.getElementById('results-loading');
+            const noMatchesState = document.getElementById('no-matches');
+            const resultsContainer = document.getElementById('results-container');
+
+            let usersData = [];
+            let currentUser = null;
+
+            // --- 1. INITIALIZE APP (Fetch users for login) ---
+            try {
+                const res = await fetch('/api/users');
+                if (!res.ok) throw new Error('Database unreachable');
+                usersData = await res.json();
+                
+                loginSelect.innerHTML = '<option value="" disabled selected>-- Choose your profile --</option>';
+                usersData.forEach(user => {
+                    const opt = document.createElement('option');
+                    opt.value = user.name;
+                    opt.textContent = user.name;
+                    loginSelect.appendChild(opt);
+                });
+            } catch (err) {
+                showError("Failed to load users. Ensure your Spring Boot backend and CognoDB are running.");
+                loginSelect.innerHTML = '<option value="">Database Connection Error</option>';
+            }
+
+            // Enable login button when user selected
+            loginSelect.addEventListener('change', (e) => {
+                loginBtn.disabled = !e.target.value;
+            });
+
+            // --- 2. LOGIN LOGIC ---
+            loginBtn.addEventListener('click', () => {
+                const selectedName = loginSelect.value;
+                currentUser = usersData.find(u => u.name === selectedName);
+                
+                if (currentUser) {
+                    // Populate Dashboard with Current User Data
+                    navUsername.textContent = currentUser.name;
+                    navAvatar.src = getAvatarUrl(currentUser.name);
+                    
+                    profileName.textContent = currentUser.name;
+                    profileImg.src = getAvatarUrl(currentUser.name);
+
+                    const createBadge = (text, type) => {
+                        const style = type === 'teach' 
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                            : 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                        return `<span class="px-3 py-1.5 rounded-md text-sm font-semibold border ${style}">${text}</span>`;
+                    };
+
+                    knowsContainer.innerHTML = currentUser.knows.length ? currentUser.knows.map(s => createBadge(s, 'teach')).join('') : '<span class="text-sm text-gray-400 italic">None</span>';
+                    wantsContainer.innerHTML = currentUser.wantsToLearn.length ? currentUser.wantsToLearn.map(s => createBadge(s, 'learn')).join('') : '<span class="text-sm text-gray-400 italic">None</span>';
+                    
+                    // Reset Match UI
+                    resetMatchUI();
+
+                    // Switch Views
+                    loginView.classList.add('hidden');
+                    dashboardView.classList.remove('hidden');
+                }
+            });
+
+            // --- 3. LOGOUT LOGIC ---
+            logoutBtn.addEventListener('click', () => {
+                currentUser = null;
+                loginSelect.value = "";
+                loginBtn.disabled = true;
+                dashboardView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+            });
+
+            function resetMatchUI() {
+                emptyState.classList.remove('hidden');
+                resultsContainer.classList.add('hidden');
+                noMatchesState.classList.add('hidden');
+                loadingState.classList.add('hidden');
+            }
+
+            // --- 4. MATCH LOGIC (The Graph Traversal) ---
+            matchBtn.addEventListener('click', async () => {
+                if (!currentUser) return;
+
+                emptyState.classList.add('hidden');
+                resultsContainer.classList.add('hidden');
+                noMatchesState.classList.add('hidden');
+                loadingState.classList.remove('hidden');
+                
+                matchBtn.disabled = true;
+                const originalBtnText = matchBtn.innerHTML;
+                matchBtn.innerHTML = '<div class="loader !w-5 !h-5 !border-2 !border-white !border-t-transparent"></div> Searching...';
+
+                try {
+                    const res = await fetch(`/api/matches/${currentUser.name}`);
+                    if (!res.ok) throw new Error('Error fetching matches');
+                    const rawMatches = await res.json();
+                    
+                    loadingState.classList.add('hidden');
+                    matchBtn.disabled = false;
+                    matchBtn.innerHTML = originalBtnText;
+
+                    if (rawMatches.length === 0) {
+                        noMatchesState.classList.remove('hidden');
+                        return;
+                    }
+
+                    // --- GROUPING LOGIC ---
+                    // Group multiple matches by mentor name to avoid duplicates
+                    const grouped = {};
+                    rawMatches.forEach(m => {
+                        if (!grouped[m.mentorName]) {
+                            grouped[m.mentorName] = { 
+                                name: m.mentorName, 
+                                iLearn: new Set(), 
+                                theyLearn: new Set() 
+                            };
+                        }
+                        grouped[m.mentorName].iLearn.add(m.iLearn);
+                        grouped[m.mentorName].theyLearn.add(m.theyLearn);
+                    });
+
+                    const finalMatches = Object.values(grouped).map(m => ({
+                        name: m.name,
+                        iLearn: Array.from(m.iLearn),
+                        theyLearn: Array.from(m.theyLearn)
+                    }));
+
+                    renderMatches(finalMatches, currentUser.name);
+                    
+                } catch (err) {
+                    loadingState.classList.add('hidden');
+                    matchBtn.disabled = false;
+                    matchBtn.innerHTML = originalBtnText;
+                    showError("Failed to run graph traversal. Check backend console.");
+                }
+            });
+
+            // --- 5. RENDER RESULTS ---
+            function renderMatches(matches, currentUserName) {
+                resultsContainer.innerHTML = matches.map((match, index) => {
+                    const iLearnText = match.iLearn.join(', ');
+                    const theyLearnText = match.theyLearn.join(', ');
+                    const planId = `plan-${index}`;
+
+                    return `
+                        <div class="border border-gray-200 bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:border-blue-300">
+                            
+                            <!-- Match Summary Header -->
+                            <div class="p-5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                                
+                                <div class="flex items-center gap-4 min-w-[200px]">
+                                    <img src="${getAvatarUrl(match.name)}" alt="${match.name}" class="h-16 w-16 rounded-full object-cover shadow-sm border border-gray-200 bg-gray-50" />
+                                    <div>
+                                        <h4 class="font-bold text-gray-900 text-xl">${match.name}</h4>
+                                        <p class="text-sm text-blue-600 font-semibold mt-0.5">100% Reciprocal Match</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex-1 flex flex-col sm:flex-row gap-4 w-full bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-500 uppercase mb-1">They will teach you</p>
+                                        <p class="font-semibold text-indigo-700">${iLearnText}</p>
+                                    </div>
+                                    <div class="hidden sm:flex items-center justify-center px-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-500 uppercase mb-1">You will teach them</p>
+                                        <p class="font-semibold text-emerald-700">${theyLearnText}</p>
+                                    </div>
+                                </div>
+
+                                <button onclick="togglePlan('${planId}')" class="w-full lg:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2 px-5 rounded-lg border border-blue-200 transition-colors flex justify-center items-center gap-2 whitespace-nowrap">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    View Joint Plan
+                                </button>
+                            </div>
+
+                            <!-- Expandable Learning Plan -->
+                            <div id="${planId}" class="hidden border-t border-gray-100 bg-slate-50 p-6">
+                                <h5 class="font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    Suggested 4-Week Skill Swap Curriculum
+                                </h5>
+                                
+                                <div class="relative border-l-2 border-blue-200 ml-3 pl-6 space-y-8">
+                                    
+                                    <div class="relative">
+                                        <div class="absolute -left-[31px] bg-white border-2 border-blue-500 h-4 w-4 rounded-full mt-1"></div>
+                                        <h6 class="font-bold text-gray-900">Week 1: Fundamentals & Setup</h6>
+                                        <p class="text-sm text-gray-600 mt-1 leading-relaxed">
+                                            <strong>You:</strong> Walk ${match.name} through setting up their environment and basics for <span class="text-emerald-600 font-semibold">${match.theyLearn[0]}</span>.<br>
+                                            <strong>${match.name}:</strong> Introduces you to the core concepts and syntax of <span class="text-indigo-600 font-semibold">${match.iLearn[0]}</span>.
+                                        </p>
+                                    </div>
+
+                                    <div class="relative">
+                                        <div class="absolute -left-[31px] bg-white border-2 border-blue-500 h-4 w-4 rounded-full mt-1"></div>
+                                        <h6 class="font-bold text-gray-900">Week 2: Pair Programming</h6>
+                                        <p class="text-sm text-gray-600 mt-1 leading-relaxed">
+                                            Spend 2 hours building a small application together that combines 
+                                            <span class="text-indigo-600 font-semibold">${match.iLearn[0]}</span> and 
+                                            <span class="text-emerald-600 font-semibold">${match.theyLearn[0]}</span>. Switch roles every 30 minutes!
+                                        </p>
+                                    </div>
+
+                                    <div class="relative">
+                                        <div class="absolute -left-[31px] bg-blue-500 border-2 border-blue-500 h-4 w-4 rounded-full mt-1"></div>
+                                        <h6 class="font-bold text-gray-900">Week 3-4: Advanced Topics</h6>
+                                        <p class="text-sm text-gray-600 mt-1 leading-relaxed">
+                                            Independent building followed by cross-code reviews. ${
+                                                match.iLearn.length > 1 || match.theyLearn.length > 1 
+                                                ? `Begin diving into secondary topics like <span class="font-semibold text-gray-800">${match.iLearn[1] || match.theyLearn[1]}</span>.` 
+                                                : `Focus on best practices, deployment pipelines, and architecture optimization.`
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                resultsContainer.classList.remove('hidden');
+            }
+
+            function showError(msg) {
+                globalError.textContent = msg;
+                globalError.classList.remove('hidden');
+                setTimeout(() => globalError.classList.add('hidden'), 5000);
+            }
+        });
+
+        // Global helper for toggling plans
+        window.togglePlan = function(planId) {
+            const planEl = document.getElementById(planId);
+            planEl.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
